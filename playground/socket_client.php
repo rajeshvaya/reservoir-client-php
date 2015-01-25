@@ -1,5 +1,9 @@
 <?php
 
+$reservoir_server = '192.168.1.153';
+$reservoir_port = '3142';
+
+
 # TODO : usual config files, class oriented and get out of playground into /src
 
 if(!($sock = socket_create(AF_INET, SOCK_STREAM, 0))) {
@@ -11,7 +15,7 @@ if(!($sock = socket_create(AF_INET, SOCK_STREAM, 0))) {
  
 echo "Socket created";
 
-if(!socket_connect($sock , 'localhost' , 3142)) {
+if(!socket_connect($sock , $reservoir_server , $reservoir_port)) {
     $errorcode = socket_last_error();
     $errormsg = socket_strerror($errorcode);
      
@@ -30,6 +34,15 @@ if(!socket_send ($sock, $data, strlen($data), 0)) {
     die("Could not send data: [$errorcode] $errormsg \n");
 }
 
-# TODO : need to research a little more on receiving data back from reservoir over TCP/IP
+# Receive data from reservoir
+if(socket_recv ($sock, $buffer, 1024, MSG_PEEK) === FALSE) {
+    $errorcode = socket_last_error();
+    $errormsg = socket_strerror($errorcode);
+     
+    die("Could not receive data: [$errorcode] $errormsg \n");
+}
+echo $buffer;
+
+
 
 ?>
