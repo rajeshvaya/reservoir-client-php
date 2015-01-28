@@ -42,6 +42,26 @@ class Reservoir{
         }
     }
 
+    # TODO : need to set configs for default values like expiry
+    /**
+     * Set a cache item on reservoir
+     * @param String  $key    
+     * @param String  $value  
+     * @param Int $expiry 
+     * @return Boolean
+     */
+    function set($key, $value, $expiry=0){
+        $data = "SET {$expiry} {$key} {$value}";
+        $result = $this->send($data);
+        if($result){
+            $result = explode(' '. $result);
+            if($result[0] == 200)
+                return true;
+        }
+        
+        return false;
+    }
+
     /**
      * Get the value of the cache key from reservoir
      * @param  String $key 
@@ -101,17 +121,16 @@ class Reservoir{
         $response = $this->send($data);
         return $response;
     }
-    
-    # TODO : need to set configs for default values like expiry
+
     /**
-     * Set a cache item on reservoir
+     * Set a cache item on reservoir for ONE TIME ACCESS only, after the first access it will deleted (kind of like notification)
      * @param String  $key    
      * @param String  $value  
      * @param Int $expiry 
      * @return Boolean
      */
-    function set($key, $value, $expiry=0){
-        $data = "SET {$expiry} {$key} {$value}";
+    function one_time_access($key, $value, $expiry=0){
+        $data = "OTA {$expiry} {$key} {$value}";
         $result = $this->send($data);
         if($result){
             $result = explode(' '. $result);
@@ -120,6 +139,48 @@ class Reservoir{
         }
         
         return false;
+    }
+
+    /**
+     * Set a immutable cache item on reservoir (it can only expire or be deleted)
+     * @param String  $key    
+     * @param String  $value  
+     * @param Int $expiry 
+     * @return Boolean
+     */
+    function set_immutable($key, $value, $expiry=0){
+        $data = "TPL {$expiry} {$key} {$value}";
+        $result = $this->send($data);
+        if($result){
+            $result = explode(' '. $result);
+            if($result[0] == 200)
+                return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * GET cache item and it if doesnt exist create it with the new value (it will always return the 'value')
+     * @param String  $key    
+     * @param String  $value  
+     * @param Int $expiry 
+     * @return Boolean
+     */
+    function get_or_set($key, $value, $expiry=0){
+        $data = "GOS {$expiry} {$key} {$value}";
+        $result = $this->send($data);
+        return $result ? $result : false;
+    }
+    
+    /**
+     * function to ping the server for connectivity (useful for long running scripts and re-initializing the socket from client)
+     * @return Boolean
+     */
+    function ping(){
+        $data = "PING";
+        $response = $this->send($data);
+        return $response == 1 ? true : false;
     }
 
     /**
