@@ -1,6 +1,6 @@
 <?php
 
-include_once('src/reservoir.class.php');
+include_once('../src/reservoir.class.php');
 
 $reservoir = new Reservoir();
 
