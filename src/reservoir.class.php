@@ -183,6 +183,10 @@ class Reservoir{
         return $response == 1 ? true : false;
     }
 
+    function disconnect(){
+        socket_close($this->socket);
+    }
+
     /**
      * Send data to reservoir in a specific format. Use this function only to send custom data which is not defined in the class
      * @param  String  $data          [FORMAT: <CACHE-PROTOCOL> <EXPIRY> <KEY> <VALUE>]
