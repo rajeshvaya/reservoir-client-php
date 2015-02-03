@@ -74,6 +74,24 @@ class Reservoir{
     }
 
     /**
+     * Set a cache item on reservoir dependent on another item
+     * @param String  $key    
+     * @param String  $value  
+     * @param Int $expiry 
+     * @return Boolean
+     */
+    function set_dependent($parent_key, $key, $value, $expiry=0){
+        $data = "DEP {$expiry} {$parent_key}::{$key} {$value}";
+        $result = $this->send($data);
+        if($result){
+            $result = explode(' '. $result);
+            if($result[0] == 200)
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * Delete a cache item from reservoir
      * @param String $key 
      * @return Boolean
