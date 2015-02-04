@@ -3,6 +3,8 @@
 class ReservoirSocket{
 	public $protocol;
 	public $socket;
+	public $host;
+	public $port;
 
 	 /**
      * Initliaze the socket with TCP/IP
@@ -23,12 +25,21 @@ class ReservoirSocket{
      * @return Boolean                  
      */
     function connect($host, $port, $optional_params=array()){
-        if(!socket_connect($this->socket, $host, $port)){
-            $this->get_last_socket_error();
-            return false;
-        }else{
-            return true;
-        }
+    	$this->host = $host;
+    	$this->port = $port;
+
+    	// open reliable connection
+    	if($this->protocol == 'TCP'){
+	        if(!socket_connect($this->socket, $host, $port)){
+	            $this->get_last_socket_error();
+	            return false;
+	        }else{
+	            return true;
+	        }
+	    }else{
+	    	// there is no open connection required for UDP
+	    	return true;
+	    }
     }
 
     /**
@@ -38,17 +49,26 @@ class ReservoirSocket{
      * @return Boolean
      */
     private function send($data, $expect_return=true){
-        if(!socket_send($this->socket, $data, strlen($data), 0)){
-            $this->get_last_socket_error();
-            return false;
-        }
+    	if($this->protocol == 'TCP'){
+	        if(!socket_send($this->socket, $data, strlen($data), 0)){
+	            $this->get_last_socket_error();
+	            return false;
+	        }
+	    }else{
+	    	if(!socket_sendto($this->socket, $data, strlen($data), 0, $this->host, $this->port)){
+	    	    $this->get_last_socket_error();
+	    	    return false;
+	    	}
+	    }
 
-        if($expect_return){
+	    if($expect_return){
             $response = $this->receive();
             if(!$response)
                 return false;
             return $response;
         }
+
+        
         return true;
     }
 
