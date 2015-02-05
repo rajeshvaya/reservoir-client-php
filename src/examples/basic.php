@@ -6,7 +6,8 @@ $reservoir = new Reservoir();
 
 //check if socket was opened successfully
 if(!$reservoir){
-	echo "Error code: {$reservoir->error[0]}, Error: {$reservoir->error[1]}";
+	$error = $reservoir->get_error();
+	echo "Error code: {$error[0]}, Error: {$error[1]}";
 	exit;
 }
 

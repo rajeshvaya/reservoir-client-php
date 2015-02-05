@@ -1,20 +1,44 @@
 <?php
+require_once('reservoir.socket.class.php');
 
 class ReservoirSocket{
-	public $protocol;
+	/**
+	 * Protocol to be used for socket connection [TCP] or [UDP]
+	 * @var [type]
+	 */
+	private $protocol;
+
+	/**
+	 * The socket object for the server connection based on the protocol set
+	 * @var ReservoirSocket
+	 */
 	public $socket;
+
+	/**
+	 * Reservoir server host
+	 * @var String
+	 */
 	public $host;
+
+	/**
+	 * [$port description]
+	 * @var Int
+	 */
 	public $port;
+
+	/**
+	 * last socket error
+	 * @var Array
+	 */
+	public $error;
 
 	 /**
      * Initliaze the socket with TCP/IP
      * @return boolean
      */
 	function __construct($protocol='TCP'){
-		if(!in_array($protocol, ['TCP', 'UDP']))
-			$protocol = 'TCP';
-		
-		$this->protocol = $protocol;
+		$this->protocol = in_array($protocol, ['TCP', 'UDP']) ? $protocol : 'TCP';
+		return $this->create_socket();
 	}
 
 	/**
@@ -42,13 +66,13 @@ class ReservoirSocket{
 	    }
     }
 
-    /**
+     /**
      * Send data to reservoir in a specific format. Use this function only to send custom data which is not defined in the class
      * @param  String  $data          [FORMAT: <CACHE-PROTOCOL> <EXPIRY> <KEY> <VALUE>]
      * @param  Boolean $expect_return [Should the class wait for the data return, if yes, call the recv function from within]
-     * @return Boolean
+     * @return Mixed
      */
-    private function send($data, $expect_return=true){
+    function send($data, $expect_return=true){
     	if($this->protocol == 'TCP'){
 	        if(!socket_send($this->socket, $data, strlen($data), 0)){
 	            $this->get_last_socket_error();
@@ -68,7 +92,6 @@ class ReservoirSocket{
             return $response;
         }
 
-        
         return true;
     }
 
@@ -76,7 +99,7 @@ class ReservoirSocket{
      * Receive data from the server. Do not wait on endless connection - MSG_PEEK
      * @return Mixed
      */
-    private function receive(){
+    function receive(){
         if(socket_recv($this->socket, $response, 1024, MSG_PEEK) == FALSE){
             $this->get_last_socket_error();
             return false;
@@ -86,6 +109,49 @@ class ReservoirSocket{
             return false;
 
         return $response;
+    }
+
+    /**
+     * Disconnect from the socket
+     * @return Boolean
+     */
+    function disconnect(){
+        return socket_close($this->socket);
+    }
+
+    /**
+     * Create a socket based on the protocol set.
+     * @return Boolean
+     */
+    private function create_socket(){
+    	if($this->protocol =='TCP')
+    		return $this->create_tcp_socket();
+    	if($this->protocol == 'UDP')
+    		return $this->create_upd_socket();
+    }
+
+    /**
+     * Create a TCP socket
+     * @return Boolean
+     */
+    private function create_tcp_socket(){
+    	if(!($this->socket = socket_create(AF_INET, SOCK_STREAM, 0))){
+    		$this->get_last_socket_error();
+    		return false;
+    	}
+    	return $this->socket;
+    }
+
+    /**
+     * Create a UDP socket
+     * @return Boolean
+     */
+    private function create_upd_socket(){
+    	if(!($this->socket = socket_create(AF_INET, SOCK_DGRAM, 0))){
+    		$this->get_last_socket_error();
+    		return false;
+    	}
+    	return $this->socket;
     }
 
     /**
