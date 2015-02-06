@@ -20,8 +20,8 @@ class Reservoir{
      * @param String $protocl           [TCP or UDP]
      * @return boolean
      */
-    function __construct($protocol='TCP'){
-        if(!$this->create_socket($protocol))
+    function __construct($host, $port, $protocol='TCP'){
+        if(!$this->create_socket($host, $port, $protocol))
             return false;
     }
 
@@ -208,8 +208,8 @@ class Reservoir{
      * @param  [type] $protocol [description]
      * @return [type]           [description]
      */
-    private function create_socket($protocol){
-        $this->socket = new ReservoirSocket($protocol);
+    private function create_socket($host, $port, $protocol){
+        $this->socket = new ReservoirSocket($host, $port, $protocol);
         return !!$this->socket;
     }
 

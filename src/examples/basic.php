@@ -2,7 +2,7 @@
 
 include_once('../src/reservoir.class.php');
 
-$reservoir = new Reservoir();
+$reservoir = new Reservoir('localhost', '3142'); // defaults to TCP
 
 //check if socket was opened successfully
 if(!$reservoir){
@@ -12,7 +12,7 @@ if(!$reservoir){
 }
 
 //try connecting to the reservoir server through the socket created above
-if(!$reservoir->connect('localhost', '3142')){
+if(!$reservoir->connect()){
 	echo "Error code: {$reservoir->error[0]}, Error: {$reservoir->error[1]}";
 	exit;	
 }

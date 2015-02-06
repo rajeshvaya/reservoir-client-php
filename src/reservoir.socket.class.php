@@ -36,7 +36,9 @@ class ReservoirSocket{
      * Initliaze the socket with TCP/IP
      * @return boolean
      */
-	function __construct($protocol='TCP'){
+	function __construct($host, $port, $protocol='TCP'){
+        $this->host = $host;
+        $this->port = $port;
 		$this->protocol = in_array($protocol, ['TCP', 'UDP']) ? $protocol : 'TCP';
 		return $this->create_socket();
 	}
@@ -48,13 +50,11 @@ class ReservoirSocket{
      * @param  Array $optional_params  [additional configurations]
      * @return Boolean                  
      */
-    function connect($host, $port, $optional_params=array()){
-    	$this->host = $host;
-    	$this->port = $port;
-
+    function connect($optional_params=array()){
+    	
     	// open reliable connection
     	if($this->protocol == 'TCP'){
-	        if(!socket_connect($this->socket, $host, $port)){
+	        if(!socket_connect($this->socket, $this->host, $this->port)){
 	            $this->get_last_socket_error();
 	            return false;
 	        }else{
@@ -123,7 +123,7 @@ class ReservoirSocket{
      * Create a socket based on the protocol set.
      * @return Boolean
      */
-    private function create_socket(){
+    private function create_socket($){
     	if($this->protocol =='TCP')
     		return $this->create_tcp_socket();
     	if($this->protocol == 'UDP')
