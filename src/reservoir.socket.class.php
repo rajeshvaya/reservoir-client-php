@@ -123,7 +123,7 @@ class ReservoirSocket{
      * Create a socket based on the protocol set.
      * @return Boolean
      */
-    private function create_socket($){
+    private function create_socket(){
     	if($this->protocol =='TCP')
     		return $this->create_tcp_socket();
     	if($this->protocol == 'UDP')
