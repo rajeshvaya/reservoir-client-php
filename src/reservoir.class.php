@@ -45,12 +45,15 @@ class Reservoir{
      * @return Boolean
      */
     function set($key, $value, $expiry=0){
-        $data = "SET {$expiry} {$key} {$value}";
-        $result = $this->send($data);
-        if($result){
-            $result = explode(' '. $result);
-            if($result[0] == 200)
-                return true;
+        $batch = array(
+            array('key' => $key, 'data' => $value, 'expiry' => $expiry)
+        );
+        $data_string = json_encode($batch);
+
+        $data = "SET {$data_string}";
+        $result = json_decode($this->send($data));
+        if($result[0]['data'] == '200 OK'){
+            return true;
         }
         
         return false;
@@ -62,9 +65,14 @@ class Reservoir{
      * @return Mixed
      */
     function get($key){
-        $data = "GET {$key}";
-        $response = $this->send($data);
-        return $response;
+        $batch = array(
+            array('key' => $key)
+        );
+        $data_string = json_encode($batch);
+
+        $data = "GET {$data_string}";
+        $response = json_decode($this->send($data));
+        return $response[0]['data'];
     }
 
     /**
@@ -91,13 +99,15 @@ class Reservoir{
      * @return Boolean
      */
     function delete($key){
-        $data = "DEL {$key}";
-        $response = $this->send($data);
-        if($result){
-            $result = explode(' '. $result);
-            if($result[0] == 200)
-                return true;
-        }
+        $batch = array(
+            array('key' => $key)
+        );
+        $data_string = json_encode($batch);
+
+        $data = "DEL {$data_string}";
+        $response = json_decode($this->send($data));
+        if($result[0]['data'] == '200 OK')
+            return true;
         return false;
     }
 
