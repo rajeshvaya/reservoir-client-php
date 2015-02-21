@@ -72,7 +72,7 @@ class ReservoirSocket{
      * @param  Boolean $expect_return [Should the class wait for the data return, if yes, call the recv function from within]
      * @return Mixed
      */
-    function send($data, $expect_return=true, $raw_response=false){
+    function send($data, $expect_return=true, $raw_response=true){
     	if($this->protocol == 'TCP'){
 	        if(!socket_send($this->socket, $data, strlen($data), 0)){
 	            $this->get_last_socket_error();
