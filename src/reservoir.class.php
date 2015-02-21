@@ -45,11 +45,23 @@ class Reservoir{
      * @return Boolean
      */
     function set($key, $value, $expiry=0){
-        $data = "SET {$expiry} {$key} {$value}";
+
+        $element = new stdClass();
+        $element->key = $key;
+        $element->data = $value;
+        $element->expiry = $expiry;
+
+        $batch = array(
+            $element
+        );
+
+        $data_string = json_encode($batch);
+
+        $data = "SET {$data_string}";
         $result = $this->send($data);
         if($result){
-            $result = explode(' '. $result);
-            if($result[0] == 200)
+            $result = json_decode($result, true);
+            if($result['data'][0][$element->data] == "200 OK")
                 return true;
         }
         
@@ -62,9 +74,16 @@ class Reservoir{
      * @return Mixed
      */
     function get($key){
-        $data = "GET {$key}";
-        $response = $this->send($data);
-        return $response;
+        $element = new stdClass();
+        $element->key = $key;
+        $batch = array(
+            $element
+        );
+
+        $data_string = json_encode($batch);
+        $data = "GET {$data_string}";
+        $response = json_decode($this->send($data), true);
+        return $response['data'][0][$element->data];
     }
 
     /**
@@ -75,13 +94,26 @@ class Reservoir{
      * @return Boolean
      */
     function set_dependent($parent_key, $key, $value, $expiry=0){
-        $data = "DEP {$expiry} {$parent_key}::{$key} {$value}";
+        $element = new stdClass();
+        $element->key = $key;
+        $element->data = $value;
+        $element->expiry = $expiry;
+        $element->parent_key = $parent_key;
+
+        $batch = array(
+            $element
+        );
+
+        $data_string = json_encode($batch);
+        $data = "DEP {$data_string}";
+
         $result = $this->send($data);
         if($result){
-            $result = explode(' '. $result);
-            if($result[0] == 200)
+            $result = json_decode($result, true);
+            if($result['data'][0][$element->data] == "200 OK")
                 return true;
         }
+        
         return false;
     }
 
@@ -91,13 +123,18 @@ class Reservoir{
      * @return Boolean
      */
     function delete($key){
-        $data = "DEL {$key}";
-        $response = $this->send($data);
-        if($result){
-            $result = explode(' '. $result);
-            if($result[0] == 200)
-                return true;
-        }
+        $element = new stdClass();
+        $element->key = $key;
+        $batch = array(
+            $element
+        );
+
+        $data_string = json_encode($batch);
+        $data = "DEL {$data_string}";
+        $response = json_decode($this->send($data), true);
+        if($response['data'][0][$element->data] == '200 OK')
+            return true;
+
         return false;
     }
 
@@ -107,9 +144,19 @@ class Reservoir{
      * @return Boolean
      */
     function increment($key){
-        $data = "ICR {$key}";
-        $response = $this->send($data);
-        return !!$response;
+        $element = new stdClass();
+        $element->key = $key;
+        $batch = array(
+            $element
+        );
+
+        $data_string = json_encode($batch);
+        $data = "ICR {$data_string}";
+        $response = json_decode($this->send($data), true);
+        if($response['data'][0][$element->data] == '200 OK')
+            return true;
+
+        return false;
     }
 
     /**
@@ -118,9 +165,19 @@ class Reservoir{
      * @return Boolean
      */
     function decrement($key){
-        $data = "DCR {$key}";
-        $response = $this->send($data);
-        return !!$response;
+        $element = new stdClass();
+        $element->key = $key;
+        $batch = array(
+            $element
+        );
+
+        $data_string = json_encode($batch);
+        $data = "DCR {$data_string}";
+        $response = json_decode($this->send($data), true);
+        if($response['data'][0][$element->data] == '200 OK')
+            return true;
+
+        return false;
     }
 
     /**
@@ -129,9 +186,16 @@ class Reservoir{
      * @return Int
      */
     function timer($key){
-        $data = "TMR {$key}";
-        $response = $this->send($data);
-        return $response;
+        $element = new stdClass();
+        $element->key = $key;
+        $batch = array(
+            $element
+        );
+
+        $data_string = json_encode($batch);
+        $data = "TMR {$data_string}";
+        $response = json_decode($this->send($data), true);
+        return $response['data'][0][$element->data];
     }
 
     /**
@@ -142,11 +206,22 @@ class Reservoir{
      * @return Boolean
      */
     function one_time_access($key, $value, $expiry=0){
-        $data = "OTA {$expiry} {$key} {$value}";
+        $element = new stdClass();
+        $element->key = $key;
+        $element->data = $value;
+        $element->expiry = $expiry;
+
+        $batch = array(
+            $element
+        );
+
+        $data_string = json_encode($batch);
+
+        $data = "OTA {$data_string}";
         $result = $this->send($data);
         if($result){
-            $result = explode(' '. $result);
-            if($result[0] == 200)
+            $result = json_decode($result, true);
+            if($result['data'][0][$element->data] == "200 OK")
                 return true;
         }
         
@@ -161,11 +236,22 @@ class Reservoir{
      * @return Boolean
      */
     function set_immutable($key, $value, $expiry=0){
-        $data = "TPL {$expiry} {$key} {$value}";
+        $element = new stdClass();
+        $element->key = $key;
+        $element->data = $value;
+        $element->expiry = $expiry;
+
+        $batch = array(
+            $element
+        );
+
+        $data_string = json_encode($batch);
+
+        $data = "TPL {$data_string}";
         $result = $this->send($data);
         if($result){
-            $result = explode(' '. $result);
-            if($result[0] == 200)
+            $result = json_decode($result, true);
+            if($result['data'][0][$element->data] == "200 OK")
                 return true;
         }
         
