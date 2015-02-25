@@ -87,6 +87,24 @@ class Reservoir{
     }
 
     /**
+     * Get all values from the entire bucket of the cache keys from reservoir
+     * @param  String $bucket 
+     * @return Mixed
+     */
+    function get_bucket($bucket){
+        $element = new stdClass();
+        $element->bucket = $bucket;
+        $batch = array(
+            $element
+        );
+
+        $data_string = json_encode($batch);
+        $data = "BKT {$data_string}";
+        $response = json_decode($this->send($data), true);
+        return $response['data'][0][$element->data];
+    }
+
+    /**
      * Set a cache item on reservoir dependent on another item
      * @param String  $key    
      * @param String  $value  
