@@ -69,6 +69,33 @@ class Reservoir{
     }
 
     /**
+     * Set multiple cache values
+     * @param Array $items 
+     * @return  Array 
+     */
+    function set_batch($items = array()){
+        if(!is_array($items)) return array();
+
+        $batch = array();
+        foreach($items as $item){
+            $element = new stdClass();
+            $element->key = $item['key'];
+            $element->data = $item['value'];
+            $element->expiry = $item['expiry'];
+            $batch[] = $element;
+        }
+        $data_string = json_encode($batch);
+        $data = "SET {$data_string}";
+        $response = json_decode($this->send($data), true);
+
+        $return_batch = array();
+        foreach($response['data'] as $response_item){
+            $return_batch[$response_item['key']] = $response_item['data'] == '200 OK' ? true : false;
+        }
+        return $return_batch;
+    }
+
+    /**
      * Get the value of the cache key from reservoir
      * @param  String $key 
      * @return Mixed
@@ -84,6 +111,26 @@ class Reservoir{
         $data = "GET {$data_string}";
         $response = json_decode($this->send($data), true);
         return $response['data'][0][$element->data];
+    }
+
+    /**
+     * Get multiple cache value in batches
+     * @param  Array  $keys 
+     * @return Array
+     */
+    function get_batch($keys = array()){
+        if(!is_array($keys)) return array();
+
+        $batch = array();
+        foreach($keys as $key){
+            $element = new stdClass();
+            $element->key = $key;
+            $batch[] = $element;
+        }
+        $data_string = json_encode($batch);
+        $data = "GET {$data_string}";
+        $response = json_decode($this->send($data), true);
+        return $response['data'];
     }
 
     /**
@@ -154,6 +201,30 @@ class Reservoir{
             return true;
 
         return false;
+    }
+
+    /**
+     * Delete multiple cache items
+     * @param  Array  $keys 
+     * @return Array
+     */
+    function delete_batch($keys = array()){
+        if(!is_array($ikeys)) return array();
+
+        $batch = array();
+        foreach($keys as $key){
+            $element = new stdClass();
+            $element->key = $key;
+            $batch[] = $element;
+        }
+        $data_string = json_encode($batch);
+        $data = "DEL {$data_string}";
+        $response = json_decode($this->send($data), true);
+        $return_batch = array();
+        foreach($response['data'] as $response_item){
+            $return_batch[$response_item['key']] = $response_item['data'] == '200 OK' ? true : false;
+        }
+        return $return_batch;
     }
 
     /**
