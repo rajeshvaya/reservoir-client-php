@@ -209,7 +209,7 @@ class Reservoir{
      * @return Array
      */
     function delete_batch($keys = array()){
-        if(!is_array($ikeys)) return array();
+        if(!is_array($keys)) return array();
 
         $batch = array();
         foreach($keys as $key){
@@ -249,6 +249,30 @@ class Reservoir{
     }
 
     /**
+     * Increment multiple cache values
+     * @param  Array $keys 
+     * @return Array
+     */
+    function increment_batch($keys = array()){
+        if(!is_array($keys)) return array();
+
+        $batch = array();
+        foreach($keys as $key){
+            $element = new stdClass();
+            $element->key = $key;
+            $batch[] = $element;
+        }
+        $data_string = json_encode($batch);
+        $data = "ICR {$data_string}";
+        $response = json_decode($this->send($data), true);
+        $return_batch = array();
+        foreach($response['data'] as $response_item){
+            $return_batch[$response_item['key']] = $response_item['data'] == '200 OK' ? true : false;
+        }
+        return $return_batch;
+    }
+
+    /**
      * Reservoir will decrement the value by 1 if it is an integer and if the key doesnt exist it will initialize it
      * @param  String $key 
      * @return Boolean
@@ -267,6 +291,30 @@ class Reservoir{
             return true;
 
         return false;
+    }
+
+    /**
+     * Decrement multiple cache values
+     * @param  Array $keys 
+     * @return Array
+     */
+    function decrement_batch($keys = array()){
+        if(!is_array($keys)) return array();
+
+        $batch = array();
+        foreach($keys as $key){
+            $element = new stdClass();
+            $element->key = $key;
+            $batch[] = $element;
+        }
+        $data_string = json_encode($batch);
+        $data = "DCR {$data_string}";
+        $response = json_decode($this->send($data), true);
+        $return_batch = array();
+        foreach($response['data'] as $response_item){
+            $return_batch[$response_item['key']] = $response_item['data'] == '200 OK' ? true : false;
+        }
+        return $return_batch;
     }
 
     /**
@@ -318,6 +366,33 @@ class Reservoir{
     }
 
     /**
+     * Set OTA for multiple cache values
+     * @param Array $items 
+     * @return  Array 
+     */
+    function one_time_access_batch($items = array()){
+        if(!is_array($items)) return array();
+
+        $batch = array();
+        foreach($items as $item){
+            $element = new stdClass();
+            $element->key = $item['key'];
+            $element->data = $item['value'];
+            $element->expiry = $item['expiry'];
+            $batch[] = $element;
+        }
+        $data_string = json_encode($batch);
+        $data = "OTA {$data_string}";
+        $response = json_decode($this->send($data), true);
+
+        $return_batch = array();
+        foreach($response['data'] as $response_item){
+            $return_batch[$response_item['key']] = $response_item['data'] == '200 OK' ? true : false;
+        }
+        return $return_batch;
+    }
+
+    /**
      * Set a immutable cache item on reservoir (it can only expire or be deleted)
      * @param String  $key    
      * @param String  $value  
@@ -346,6 +421,35 @@ class Reservoir{
         
         return false;
     }
+
+    /**
+     * Set TPL for multiple cache values
+     * @param Array $items 
+     * @return  Array 
+     */
+    function set_immutable_batch($items = array()){
+        if(!is_array($items)) return array();
+
+        $batch = array();
+        foreach($items as $item){
+            $element = new stdClass();
+            $element->key = $item['key'];
+            $element->data = $item['value'];
+            $element->expiry = $item['expiry'];
+            $batch[] = $element;
+        }
+        $data_string = json_encode($batch);
+        $data = "TPL {$data_string}";
+        $response = json_decode($this->send($data), true);
+
+        $return_batch = array();
+        foreach($response['data'] as $response_item){
+            $return_batch[$response_item['key']] = $response_item['data'] == '200 OK' ? true : false;
+        }
+        return $return_batch;
+    }
+
+
     
     /**
      * GET cache item and it if doesnt exist create it with the new value (it will always return the 'value')
