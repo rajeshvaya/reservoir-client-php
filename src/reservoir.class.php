@@ -1,4 +1,6 @@
 <?php
+require_once('reservoir.socket.class.php');
+
 /**
  * Reservoir client library for PHP
  */

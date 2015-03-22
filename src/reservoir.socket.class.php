@@ -1,5 +1,4 @@
 <?php
-require_once('reservoir.socket.class.php');
 
 class ReservoirSocket{
 	/**
